@@ -1,0 +1,16 @@
+[project]
+name = "kaiko-take-home-assignment"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.118.0",
+    "pandas>=2.3.3",
+    "pytest>=8.4.2",
+    "uvicorn>=0.37.0",
+]
+
+[tool.uv.workspace]
+members = [
+  "services/*",
+  "libs/*",
+]

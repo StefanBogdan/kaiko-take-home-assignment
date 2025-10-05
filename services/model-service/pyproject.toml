@@ -1,0 +1,11 @@
+[project]
+name = "model-service"
+version = "1.0.0"
+description = "ML inference service for model training and prediction"
+dependencies = [
+    "scikit-learn>=1.7.2",
+    "utils",
+]
+
+[tool.uv.sources]
+utils = { workspace = true }

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sklearn.ensemble import RandomForestClassifier
@@ -143,9 +144,10 @@ async def predict(request: PredictionRequest):
     """Make predictions using a trained model."""
     start_time = time.time()
 
+    if request.model_name not in models:
+        raise HTTPException(status_code=404, detail=f"Model '{request.model_name}' not found")
+    
     try:
-        if request.model_name not in models:
-            raise HTTPException(status_code=404, detail=f"Model '{request.model_name}' not found")
 
         # Sanitize input data
         sanitized_data = [sanitize_input_data(item) for item in request.data]
