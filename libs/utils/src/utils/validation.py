@@ -1,7 +1,8 @@
 """Data validation utilities shared across services."""
 
-import pandas as pd
 from typing import Dict, List, Optional
+
+import pandas as pd
 
 
 def validate_dataframe_schema(df: pd.DataFrame, required_columns: List[str]) -> bool:
@@ -12,8 +13,9 @@ def validate_dataframe_schema(df: pd.DataFrame, required_columns: List[str]) -> 
     return True
 
 
-def validate_numeric_range(value: float, min_val: Optional[float] = None,
-                          max_val: Optional[float] = None) -> bool:
+def validate_numeric_range(
+    value: float, min_val: Optional[float] = None, max_val: Optional[float] = None
+) -> bool:
     """Validate that numeric value is within specified range."""
     if min_val is not None and value < min_val:
         raise ValueError(f"Value {value} below minimum {min_val}")

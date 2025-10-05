@@ -1,0 +1,7 @@
+target-version = "py313"
+
+[lint]
+ignore = ["I001", "E501"]  # ignore import order + line length
+
+[lint.per-file-ignores]
+"tests/*" = ["F401", "S101"]  # ignore "assert" rule as well

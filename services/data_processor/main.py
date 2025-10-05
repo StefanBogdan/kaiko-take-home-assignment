@@ -7,10 +7,16 @@ import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
-from utils.validation import validate_dataframe_schema, sanitize_input_data, validate_numeric_range
-from utils.logging_config import setup_logger, log_request_info, log_data_processing_stats
-
+from utils.logging_config import (
+    log_data_processing_stats,
+    log_request_info,
+    setup_logger,
+)
+from utils.validation import (
+    sanitize_input_data,
+    validate_dataframe_schema,
+    validate_numeric_range,
+)
 
 app = FastAPI(title="Data Processor Service", version="1.0.0")
 logger = setup_logger("data-processor")
@@ -83,7 +89,9 @@ async def process_data(request: ProcessingRequest):
             result_df = df
 
         else:
-            raise HTTPException(status_code=400, detail=f"Unknown operation: {request.operation}")
+            raise HTTPException(
+                status_code=400, detail=f"Unknown operation: {request.operation}"
+            )
 
         # Convert back to list of dicts
         processed_data = result_df.to_dict("records")
@@ -91,7 +99,9 @@ async def process_data(request: ProcessingRequest):
         duration = time.time() - start_time
 
         # Log processing stats
-        log_data_processing_stats(logger, request.operation, len(processed_data), duration)
+        log_data_processing_stats(
+            logger, request.operation, len(processed_data), duration
+        )
 
         response = ProcessingResponse(
             processed_data=processed_data,
@@ -99,9 +109,9 @@ async def process_data(request: ProcessingRequest):
                 "input_records": len(request.data),
                 "output_records": len(processed_data),
                 "duration_seconds": round(duration, 3),
-                "operation": request.operation
+                "operation": request.operation,
             },
-            status="success"
+            status="success",
         )
 
         return response
@@ -118,8 +128,9 @@ async def log_requests(request, call_next):
     start_time = time.time()
     response = await call_next(request)
     duration = time.time() - start_time
-    log_request_info(logger, request.method, str(request.url.path),
-                    response.status_code, duration)
+    log_request_info(
+        logger, request.method, str(request.url.path), response.status_code, duration
+    )
     return response
 
 
