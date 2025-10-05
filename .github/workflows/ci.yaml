@@ -90,4 +90,6 @@ jobs:
             ~/.local/share/uv
           key: uv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml', '**/uv.lock') }}
       - name: Run tests
-        run: uv run pytest -v
+        run: uv run --all-packages pytest -v
+        # If workspaces have conflicts we can run the tests 
+        # run: uv run scripts/test_all_packages.py 
