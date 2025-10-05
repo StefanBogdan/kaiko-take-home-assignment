@@ -1,5 +1,5 @@
 [project]
-name = "model-service"
+name = "model_service"
 version = "1.0.0"
 description = "ML inference service for model training and prediction"
 dependencies = [
