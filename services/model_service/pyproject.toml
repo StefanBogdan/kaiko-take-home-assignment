@@ -3,7 +3,7 @@ name = "model_service"
 version = "1.0.0"
 description = "ML inference service for model training and prediction"
 dependencies = [
-    "scikit-learn>=1.7.2",
+    "scikit-learn>=1.7.2,<2.0.0",
     "utils",
 ]
 

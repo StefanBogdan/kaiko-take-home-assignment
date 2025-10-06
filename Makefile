@@ -87,7 +87,7 @@ test:
 .PHONY: ci
 ci:
 	@echo "🏗️  Running full CI pipeline locally using act..."
-	PATH="$(HOME)/.local/bin:$$PATH" act --container-architecture linux/amd64 --pull=false
+	PATH="$(HOME)/.local/bin:$$PATH" act --container-architecture linux/amd64 --pull=false --artifact-server-path ./.tmp/artifacts
 	@echo "🎉 Local CI completed successfully!"
 
 # --------------------------------------------------------------
@@ -101,4 +101,5 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".tmp" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Cleanup complete."

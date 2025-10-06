@@ -3,10 +3,9 @@ name = "kaiko-take-home-assignment"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi[standard]>=0.118.0",
-    "pandas>=2.3.3",
-    "pre-commit>=4.3.0",
-    "uvicorn>=0.37.0",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.118.0,<1.0.0",
+    "pandas>=2.3.3,<3.0.0",
+    "uvicorn>=0.37.0,<1.0.0",
 ]
 
 [tool.uv.workspace]
@@ -17,7 +16,8 @@ members = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.13.3",
+    "pytest>=8.4.2,<9.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "ruff>=0.13.3,<1.0.0",
+    "pre-commit>=4.3.0,<5.0.0",
 ]
