@@ -1,0 +1,104 @@
+# .github/workflows/reusable-service-pipeline.yml
+name: Reusable Service Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      service_path:
+        required: true
+        type: string
+      run_tests:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/uv.lock"
+
+      - name: Restore uv cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ inputs.service_name }}-${{ hashFiles(format('{0}/uv.lock', inputs.service_path)) }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ inputs.service_name }}-
+            uv-${{ runner.os }}-
+
+      - name: Install dependencies (from root directory)
+        run: uv sync --frozen
+
+      - name: Cache ruff
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ruff
+          key: ruff-${{ runner.os }}-${{ inputs.service_name }}-${{ hashFiles(format('{0}/**/*.py', inputs.service_path)) }}
+          restore-keys: |
+            ruff-${{ runner.os }}-${{ inputs.service_name }}-
+            ruff-${{ runner.os }}-
+
+      - name: Run linter
+        working-directory: ${{ inputs.service_path }}
+        run: uv run ruff check . --output-format=github
+
+      - name: Run formatter check
+        working-directory: ${{ inputs.service_path }}
+        run: uv run ruff format --check .
+
+      - name: Run tests with coverage
+        if: ${{ inputs.run_tests }}
+        working-directory: ${{ inputs.service_path }}
+        run: |
+          uv run pytest \
+            --cov \
+            --cov-report=xml \
+            --cov-report=term \
+            --junit-xml=pytest-results.xml \
+            -v
+
+      - name: Cache test results
+        if: ${{ inputs.run_tests }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.service_path }}/.pytest_cache
+          key: pytest-${{ runner.os }}-${{ inputs.service_name }}-${{ github.sha }}
+          restore-keys: |
+            pytest-${{ runner.os }}-${{ inputs.service_name }}-
+
+      - name: Upload test results
+        if: ${{ inputs.run_tests && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.service_name }}-test-results
+          path: ${{ inputs.service_path }}/pytest-results.xml
+
+      - name: Upload coverage
+        if: ${{ inputs.run_tests }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.service_name }}-coverage
+          path: ${{ inputs.service_path }}/coverage.xml
+
+      - name: Build package
+        working-directory: ${{ inputs.service_path }}
+        run: uv build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.service_name }}-dist
+          path: ${{ inputs.service_path }}/dist
+          retention-days: 7

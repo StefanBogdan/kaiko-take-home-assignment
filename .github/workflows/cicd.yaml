@@ -1,0 +1,95 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      force_full_build:
+        description: 'Force full build of all services'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for accurate change detection
+
+      - name: Detect changed services
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            data_processor:
+              - 'services/data_processor/**'
+            model_service:
+              - 'services/model_service/**'
+
+            libs:
+              - 'libs/**'
+            ci:
+              - '.github/workflows/**'
+
+      - name: Check if any changes detected
+        id: check
+        run: |
+          if [ "${{ steps.filter.outputs.changes }}" != "[]" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Job for data_processor
+  data_processor:
+    needs: detect-changes
+    if: |
+      github.event.inputs.force_full_build == 'true' ||
+      contains(needs.detect-changes.outputs.services, 'data_processor') ||
+      contains(needs.detect-changes.outputs.services, 'libs') ||
+      contains(needs.detect-changes.outputs.services, 'ci')
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: data_processor
+      service_path: services/data_processor
+      run_tests: true
+
+  # Job for model_service
+  model_service:
+    needs: detect-changes
+    if: |
+      github.event.inputs.force_full_build == 'true' ||
+      contains(needs.detect-changes.outputs.services, 'model_service') ||
+      contains(needs.detect-changes.outputs.services, 'libs') ||
+      contains(needs.detect-changes.outputs.services, 'ci')
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: model_service
+      service_path: services/model_service
+      run_tests: true
+
+  pipeline-summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, data_processor, model_service]
+    steps:
+      - name: Pipeline Summary
+        run: |
+          echo "## 🚀 Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Changed Services:** ${{ needs.detect-changes.outputs.services }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Service Status" >> $GITHUB_STEP_SUMMARY
+          echo "- data_processor: ${{ needs.data_processor.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- model_service: ${{ needs.model_service.result }}" >> $GITHUB_STEP_SUMMARY
