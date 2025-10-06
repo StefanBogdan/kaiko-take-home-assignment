@@ -6,10 +6,10 @@ Please note that while the time needed to complete this technical assignment is 
 
 ## High-Level Overview
 
-- **🏗️ Part 1: Monorepo Setup**  
+- **🏗️ Part 1: Monorepo Setup**
   Convert the existing separate Python projects into a unified monorepo with shared dependencies and tooling. Eliminate code duplication and resolve dependency conflicts while maintaining independent deployability.
 
-- **🚀 Part 2: CI/CD Pipeline**  
+- **🚀 Part 2: CI/CD Pipeline**
   Design and implement an efficient CI/CD pipeline that leverages the monorepo structure for optimal build performance, caching, and developer experience.
 
 ## Starter Pack

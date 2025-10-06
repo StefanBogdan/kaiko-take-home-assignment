@@ -29,12 +29,12 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: main
           filters: |
             data_processor:
               - 'services/data_processor/**'
             model_service:
               - 'services/model_service/**'
-
             libs:
               - 'libs/**'
             ci:
